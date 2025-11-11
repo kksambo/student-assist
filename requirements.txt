@@ -13,5 +13,5 @@ PyPDF2>=3.0.1
 pydantic>=2.5.0
 python-multipart
 librosa
-pip install PyMuPDF
+PyMuPDF
 
