@@ -1,0 +1,17 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+
+SQLAlchemy>=2.0.0
+aiosqlite>=0.19.0
+
+python-dotenv>=1.0.0
+passlib[bcrypt]>=1.7.4
+PyJWT>=2.8.0
+
+httpx>=0.24.1
+PyPDF2>=3.0.1
+pydantic>=2.5.0
+python-multipart
+librosa
+pip install PyMuPDF
+
