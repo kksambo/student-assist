@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI
-from routes import auth, resources,student_resources,chat,admin_resources,resource_router,finacial_aid,carrers,summaries
+from routes import auth, resources,student_resources,chat,admin_resources,resource_router,finacial_aid,summaries
 from models import Base
 from database import engine  # async engine
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,7 +31,6 @@ app.include_router(chat.router)
 app.include_router(admin_resources.router)
 app.include_router(resource_router.router)
 app.include_router(finacial_aid.router)
-app.include_router(carrers.router)
 app.include_router(summaries.router)
 
 
