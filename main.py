@@ -1,8 +1,8 @@
 import asyncio
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException,Depends
 from routes import auth, resources,student_resources,chat,admin_resources,resource_router,finacial_aid,summaries
 from models import Base
-from database import engine  # async engine
+from database import engine,get_db  # async engine
 from fastapi.middleware.cors import CORSMiddleware
 import io
 import json
@@ -11,6 +11,10 @@ import requests
 import os
 import re
 import ast
+from sqlalchemy.ext.asyncio import AsyncSession
+from models import Event
+from sqlalchemy.future import select
+from schemas import EventCreate,EventBase,Event as EventBaseSchema
 
 
 import uvicorn
@@ -164,6 +168,62 @@ async def extract_event(file: UploadFile = File(...)):
     event = generate_event_details(text)
 
     return {"success": True, "event": event}
+
+
+@app.get("/events/", response_model=list[EventBaseSchema])
+async def read_events(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Event).offset(skip).limit(limit))
+    events = result.scalars().all()
+    return events
+
+
+# READ single event
+@app.get("/events/{event_id}", response_model=EventBaseSchema)
+async def read_event(event_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Event).where(Event.id == event_id))
+    event = result.scalar_one_or_none()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+
+# CREATE event
+@app.post("/events/", response_model=EventBaseSchema)
+async def create_event(event: EventCreate, db: AsyncSession = Depends(get_db)):
+    new_event = Event(**event.dict())
+    db.add(new_event)
+    await db.commit()
+    await db.refresh(new_event)
+    return new_event
+
+
+# UPDATE event
+@app.put("/events/{event_id}", response_model=EventBaseSchema)
+async def update_event(event_id: int, event: EventCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Event).where(Event.id == event_id))
+    db_event = result.scalar_one_or_none()
+    if not db_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    for key, value in event.dict().items():
+        setattr(db_event, key, value)
+
+    await db.commit()
+    await db.refresh(db_event)
+    return db_event
+
+
+# DELETE event
+@app.delete("/events/{event_id}")
+async def delete_event(event_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Event).where(Event.id == event_id))
+    db_event = result.scalar_one_or_none()
+    if not db_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    await db.delete(db_event)
+    await db.commit()
+    return {"detail": "Event deleted successfully"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
