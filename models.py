@@ -57,3 +57,13 @@ class FinancialAidResource(Base):
     description = Column(String(1000), nullable=False)
     requirements = Column(String(1000), nullable=True)
     link = Column(String(500), nullable=True)
+
+class Event(Base):
+    __tablename__ = "events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(String(1000), nullable=False)
+    date = Column(String(50), nullable=False)
+    time = Column(String(50), nullable=False)
+    department = Column(String(255), nullable=False)
