@@ -173,3 +173,18 @@ class FinancialAidResourceResponse(FinancialAidResourceBase):
 
     class Config:
         orm_mode = True
+
+class EventBase(BaseModel):
+    title: str
+    description: str
+    date: str
+    time: str
+    department: str
+
+class EventCreate(EventBase):
+    pass
+
+class Event(EventBase):
+    id: int
+    class Config:
+        orm_mode = True
